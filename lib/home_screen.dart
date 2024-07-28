@@ -1,5 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:todo_app/add_task_screen.dart';
+import 'package:todo_app/database.dart';
+import 'package:todo_app/task.dart';
+import 'package:todo_app/task_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,7 +14,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Task> tasks = [];
+  TaskDatabase taskDatabase = TaskDatabase.taskDatabase;
+
   bool? checkBoxValue = false;
+
+  @override
+  void initState() {
+    test();
+    super.initState();
+  }
+
+  void test() async {
+    var tempTask = await taskDatabase.getAllTask();
+
+    setState(() {
+      tasks = tempTask;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.black,
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
+          onPressed: () async {
+            bool? response = await Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const AddTaskScreen(),
             ));
+
+            if (response != null && response == true) {
+              test();
+            }
           },
           child: const Icon(
             Icons.add,
@@ -47,67 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(
                 height: 30,
               ),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      color: Colors.black,
-                    )),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Attend Class',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
-                          ),
-                        ),
-                        Checkbox(
-                            value: checkBoxValue,
-                            side: const BorderSide(
-                              width: 0.8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                checkBoxValue = val;
-                              });
-                            })
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '07/10/2024 10.00 AM',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green,
-                          ),
-                        ),
-                        Text(
-                          '07/10/2024  11:00AM',
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.red),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              ...tasks.map(
+                (e) => TaskCard(task: e),
+              )
             ],
           ),
         ),
