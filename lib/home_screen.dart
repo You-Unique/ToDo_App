@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:todo_app/add_task_screen.dart';
 import 'package:todo_app/database.dart';
